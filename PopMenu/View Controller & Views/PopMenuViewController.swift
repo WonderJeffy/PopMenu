@@ -16,6 +16,8 @@ import UIKit
 
 final public class PopMenuViewController: UIViewController {
 
+    static let kSeparatorTag = 999
+
     // MARK: - Properties
 
     /// Delegate instance for handling callbacks.
@@ -43,6 +45,8 @@ final public class PopMenuViewController: UIViewController {
 
     /// Main content view.
     public let contentView = PopMenuGradientView()
+
+    public var headerView: UIView?
 
     /// The view contains all the actions.
     public let actionsView = UIStackView()
@@ -246,7 +250,6 @@ extension PopMenuViewController {
             let color = backgroundStyle.dimColor,
             let opacity = backgroundStyle.dimOpacity
         {
-
             backgroundView.backgroundColor = color.withAlphaComponent(opacity)
         }
 
@@ -324,20 +327,35 @@ extension PopMenuViewController {
     ///
     /// - Returns: The fitting frame
     fileprivate func calculateContentFittingFrame() -> CGRect {
-        var height: CGFloat
-
-        if actions.count >= appearance.popMenuActionCountForScrollable {
-            // Make scroll view
-            height = CGFloat(appearance.popMenuActionCountForScrollable) * appearance.popMenuActionHeight
-            height -= 20
-        } else {
-            height = CGFloat(actions.count) * appearance.popMenuActionHeight
+        guard actions.count >= appearance.popMenuActionCountForScrollable else {
+            let height = calculateContentFittingHeight()
+            let size = CGSize(width: calculateContentWidth(), height: height)
+            let origin = calculateContentOrigin(with: size)
+            return CGRect(origin: origin, size: size)
         }
-
-        let size = CGSize(width: calculateContentWidth(), height: height)
+        // Make scroll view
+        let height =
+            CGFloat(appearance.popMenuActionCountForScrollable)
+            * (appearance.popMenuActionHeight + appearance.popMenuItemSeparator.height)
+        // -20 为滚动提供余量
+        let size = CGSize(width: calculateContentWidth(), height: height - 20)
         let origin = calculateContentOrigin(with: size)
-
         return CGRect(origin: origin, size: size)
+    }
+
+    fileprivate func calculateContentFittingHeight() -> CGFloat {
+        var height = actions.reduce(0) { (result, action) -> CGFloat in
+            let separatorHeight =
+                action.separatorHeight > 0 ? action.separatorHeight : appearance.popMenuItemSeparator.height
+            return result + appearance.popMenuActionHeight + separatorHeight
+        }
+        if let header = headerView {
+            height += header.frame.height
+        } else {
+            // 如果没有 header, 则第一个 action 不需要分割线
+            height -= appearance.popMenuItemSeparator.height
+        }
+        return height
     }
 
     /// Determine where the menu should display.
@@ -446,7 +464,8 @@ extension PopMenuViewController {
         actionsView.translatesAutoresizingMaskIntoConstraints = false
         actionsView.axis = .vertical
         actionsView.alignment = .fill
-        actionsView.distribution = .fillEqually
+        actionsView.distribution = .fillProportionally
+        actionsView.spacing = 0
 
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(menuDidLongPress(_:)))
         longPressGesture.minimumPressDuration = 0.5
@@ -460,8 +479,8 @@ extension PopMenuViewController {
             action.renderActionView()
 
             // Give separator to each action but the last
-            if !action.isEqual(actions.last) {
-                addSeparator(to: action.view)
+            if !action.isEqual(actions.first) || headerView != nil {
+                addSeparator(to: action)
             }
 
             let tapper = UITapGestureRecognizer(target: self, action: #selector(menuDidTap(_:)))
@@ -470,7 +489,7 @@ extension PopMenuViewController {
             // 避免长按手势和点击手势冲突
             tapper.require(toFail: longPressGesture)
             action.view.addGestureRecognizer(tapper)
-
+            action.view.heightAnchor.constraint(equalToConstant: appearance.popMenuActionHeight).isActive = true
             actionsView.addArrangedSubview(action.view)
         }
 
@@ -484,7 +503,8 @@ extension PopMenuViewController {
             scrollView.showsHorizontalScrollIndicator = false
             scrollView.showsVerticalScrollIndicator = !appearance.popMenuScrollIndicatorHidden
             scrollView.indicatorStyle = appearance.popMenuScrollIndicatorStyle
-            scrollView.contentSize.height = appearance.popMenuActionHeight * CGFloat(actions.count)
+
+            scrollView.contentSize.height = calculateContentFittingHeight()
 
             scrollView.addSubview(actionsView)
             contentView.addSubview(scrollView)
@@ -519,23 +539,21 @@ extension PopMenuViewController {
     /// - Parameters:
     ///   - separator: Separator style
     ///   - actionView: Action's view
-    fileprivate func addSeparator(to actionView: UIView) {
+    fileprivate func addSeparator(to action: PopMenuAction) {
         // Only setup separator if the style is neither 0 height or clear color
         guard appearance.popMenuItemSeparator != .none() else { return }
 
         let separator = appearance.popMenuItemSeparator
 
         let separatorView = UIView()
+        separatorView.tag = PopMenuViewController.kSeparatorTag
         separatorView.translatesAutoresizingMaskIntoConstraints = false
         separatorView.backgroundColor = separator.color
-
-        actionView.addSubview(separatorView)
+        let separatorHeight = action.separatorHeight > 0 ? action.separatorHeight : separator.height
+        actionsView.addArrangedSubview(separatorView)
 
         NSLayoutConstraint.activate([
-            separatorView.leftAnchor.constraint(equalTo: actionView.leftAnchor),
-            separatorView.rightAnchor.constraint(equalTo: actionView.rightAnchor),
-            separatorView.bottomAnchor.constraint(equalTo: actionView.bottomAnchor),
-            separatorView.heightAnchor.constraint(equalToConstant: separator.height),
+            separatorView.heightAnchor.constraint(equalToConstant: separatorHeight)
         ])
     }
 
@@ -609,8 +627,11 @@ extension PopMenuViewController {
         // Check which action is associated.
         let touchLocation = gesture.location(in: actionsView)
         // Get associated index for touch location.
-        if let touchedView = actionsView.arrangedSubviews.filter({ return $0.frame.contains(touchLocation) }).first,
-            let index = actionsView.arrangedSubviews.index(of: touchedView)
+        let allActionViews = actionsView.arrangedSubviews.filter { $0.tag != PopMenuViewController.kSeparatorTag }
+        if let touchedView = allActionViews.filter({
+            return $0.frame.contains(touchLocation)
+        }).first,
+            let index = allActionViews.index(of: touchedView)
         {
             return index
         }

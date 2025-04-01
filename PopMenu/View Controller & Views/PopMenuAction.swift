@@ -11,6 +11,8 @@ import UIKit
 /// Customize your own action and conform to `PopMenuAction` protocol.
 @objc public protocol PopMenuAction: NSObjectProtocol {
 
+    var separatorHeight: CGFloat { get set }
+
     /// Title of the action.
     var title: String? { get }
 
@@ -54,6 +56,8 @@ import UIKit
 
 /// The default PopMenu action class.
 public class PopMenuDefaultAction: NSObject, PopMenuAction {
+
+    public var separatorHeight: CGFloat = 0
 
     /// Title of action.
     public let title: String?

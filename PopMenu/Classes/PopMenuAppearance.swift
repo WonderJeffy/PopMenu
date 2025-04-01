@@ -22,19 +22,19 @@ final public class PopMenuAppearance: NSObject {
     public var popMenuColor: PopMenuColor = .default()
     
     /// Background style.
-    public var popMenuBackgroundStyle: PopMenuBackgroundStyle = .dimmed(color: .black, opacity: 0.4)
-    
+    public var popMenuBackgroundStyle: PopMenuBackgroundStyle = .none()
+
     /// The font for labels.
-    public var popMenuFont: UIFont = UIFont.systemFont(ofSize: 16, weight: .semibold)
-    
+    public var popMenuFont: UIFont = UIFont.systemFont(ofSize: 14, weight: .medium)
+
     /// Corner radius for rounded corners.
-    public var popMenuCornerRadius: CGFloat = 24
-    
+    public var popMenuCornerRadius: CGFloat = 6
+
     /// How tall each action is.
-    public var popMenuActionHeight: CGFloat = 50
-    
+    public var popMenuActionHeight: CGFloat = 44
+
     /// How many actions are the breakpoint to trigger scrollable.
-    public var popMenuActionCountForScrollable: UInt = 6
+    public var popMenuActionCountForScrollable: UInt = UInt.max
 
     /// The scroll indicator style when the actions are scrollable.
     public var popMenuScrollIndicatorStyle: UIScrollView.IndicatorStyle = .white
@@ -43,7 +43,7 @@ final public class PopMenuAppearance: NSObject {
     public var popMenuScrollIndicatorHidden = false
     
     /// The separator style for each action.
-    public var popMenuItemSeparator: PopMenuActionSeparator = .none()
+    public var popMenuItemSeparator: PopMenuActionSeparator = .fill(.black, height: 0.47)
 
     /// The status bar style of the pop menu.
     public var popMenuStatusBarStyle: UIStatusBarStyle?
@@ -110,7 +110,7 @@ public struct PopMenuColor {
     
     /// Get default background and action color.
     public static func `default`() -> PopMenuColor {
-        return PopMenuColor(backgroundColor: .gradient(fill: #colorLiteral(red: 0.168627451, green: 0.168627451, blue: 0.168627451, alpha: 1), #colorLiteral(red: 0.2156862745, green: 0.2156862745, blue: 0.2156862745, alpha: 1)), actionColor: .tint(.white))
+        return PopMenuColor(backgroundColor: .solid(fill: .black.withAlphaComponent(0.25)), actionColor: .tint(.white))
     }
     
 }
