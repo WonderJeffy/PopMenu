@@ -17,7 +17,9 @@ public typealias Color = UIColor
 /// Appearance for PopMenu.
 /// Use for configuring custom styles and looks.
 final public class PopMenuAppearance: NSObject {
-    
+
+    public var popMenuActionEdgeInsets: UIEdgeInsets = .init(top: 0, left: 16, bottom: 0, right: 16)
+
     /// Background and tint colors.
     public var popMenuColor: PopMenuColor = .default()
     

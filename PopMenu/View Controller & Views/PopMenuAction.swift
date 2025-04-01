@@ -11,7 +11,13 @@ import UIKit
 /// Customize your own action and conform to `PopMenuAction` protocol.
 @objc public protocol PopMenuAction: NSObjectProtocol {
 
+    /// if `separatorHeight` > 0, a separator will be rendered
+    /// else the action will be rendered with default separatorHeight from `PopMenuAppearance`
     var separatorHeight: CGFloat { get set }
+
+    /// if `edgeInsets` is not `.zero`, the action will be rendered with edgeInsets
+    /// else the action will be rendered with default edgeInsets from `PopMenuAppearance`
+    var edgeInsets: UIEdgeInsets { get set }
 
     /// Title of the action.
     var title: String? { get }
@@ -49,6 +55,8 @@ import UIKit
     /// Called when the action gets selected.
     @objc optional func actionSelected(animated: Bool)
 
+    func caculateWidth() -> CGFloat
+
     /// Type alias for selection handler.
     typealias PopMenuActionHandler = (PopMenuAction) -> Void
 
@@ -56,6 +64,9 @@ import UIKit
 
 /// The default PopMenu action class.
 public class PopMenuDefaultAction: NSObject, PopMenuAction {
+
+    /// only work with horizontal axis
+    public var edgeInsets: UIEdgeInsets = .init(top: 0, left: 16, bottom: 0, right: 16)
 
     public var separatorHeight: CGFloat = 0
 
@@ -145,11 +156,6 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
         return imageView
     }()
 
-    // MARK: - Constants
-
-    public static let leftPadding: CGFloat = 34
-    public static let rightPadding: CGFloat = 16
-
     // MARK: - Initializer
 
     /// Initializer.
@@ -176,7 +182,7 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
                 iconImageView.widthAnchor.constraint(equalToConstant: iconWidthHeight),
                 iconImageView.heightAnchor.constraint(equalTo: iconImageView.widthAnchor),
                 iconImageView.trailingAnchor.constraint(
-                    equalTo: view.trailingAnchor, constant: -PopMenuDefaultAction.rightPadding),
+                    equalTo: view.trailingAnchor, constant: -edgeInsets.right),
                 iconImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             ])
         }
@@ -186,10 +192,10 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(
                 equalTo: view.leadingAnchor,
-                constant: PopMenuDefaultAction.leftPadding),
+                constant: edgeInsets.left),
             titleLabel.trailingAnchor.constraint(
                 equalTo: hasImage ? iconImageView.leadingAnchor : view.trailingAnchor,
-                constant: hasImage ? 0 : -PopMenuDefaultAction.rightPadding),
+                constant: hasImage ? 0 : -edgeInsets.right),
             titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
     }
@@ -229,6 +235,13 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
                         })
                 })
         }
+    }
+
+    public func caculateWidth() -> CGFloat {
+        let edgeWidth = edgeInsets.left + edgeInsets.right
+        let textWidth = titleLabel.sizeThatFits(view.bounds.size).width
+        let textIconSpace = 14.0
+        return edgeWidth + textWidth + textIconSpace + iconWidthHeight
     }
 
 }

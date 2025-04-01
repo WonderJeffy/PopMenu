@@ -151,8 +151,8 @@ final public class PopMenuViewController: UIViewController {
         view.backgroundColor = .clear
 
         configureBackgroundView()
-        configureContentView()
         configureActionsView()
+        configureContentView()
     }
 
     /// Set absolute source frame relative to screen frame.
@@ -437,25 +437,10 @@ extension PopMenuViewController {
     ///
     /// - Returns: The fitting width for content
     fileprivate func calculateContentWidth() -> CGFloat {
-        var contentFitWidth: CGFloat = 0
-        contentFitWidth += PopMenuDefaultAction.leftPadding + PopMenuDefaultAction.rightPadding
-
         // Calculate the widest width from action titles to determine the width
-        if let action = actions.max(by: {
-            guard let title1 = $0.title, let title2 = $1.title else { return false }
-            return title1.count < title2.count
-        }) {
-            let sizingLabel = UILabel()
-            sizingLabel.font = appearance.popMenuFont
-            sizingLabel.text = action.title
-
-            let desiredWidth = sizingLabel.sizeThatFits(view.bounds.size).width
-            contentFitWidth += desiredWidth
-
-            let textIconSpace = 14.0
-            contentFitWidth += textIconSpace + action.iconWidthHeight
-        }
-
+        let contentFitWidth = actions.map( { $0.caculateWidth() }).max() {
+            return $0 < $1
+        } ?? 0
         return min(contentFitWidth, maxContentWidth)
     }
 
@@ -476,6 +461,9 @@ extension PopMenuViewController {
         actions.forEach { action in
             action.font = appearance.popMenuFont
             action.tintColor = action.color ?? appearance.popMenuColor.actionColor.color
+            if action.edgeInsets == .zero {
+                action.edgeInsets = appearance.popMenuActionEdgeInsets
+            }
             action.renderActionView()
 
             // Give separator to each action but the last
