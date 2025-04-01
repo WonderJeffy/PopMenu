@@ -49,6 +49,8 @@ import UIKit
     /// Is the view highlighted by gesture.
     var highlighted: Bool { get set }
 
+    var keepSelected: Bool { get set }
+
     /// Render the view for action.
     func renderActionView()
 
@@ -90,6 +92,8 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
 
     /// Icon sizing.
     public var iconWidthHeight: CGFloat = 24
+
+    public var keepSelected: Bool = false
 
     // MARK: - Computed Properties
 
@@ -138,7 +142,7 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
     // MARK: - Subviews
 
     /// Title label view instance.
-    private lazy var titleLabel: UILabel = {
+    lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isUserInteractionEnabled = false
@@ -148,7 +152,7 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
     }()
 
     /// Icon image view instance.
-    private lazy var iconImageView: UIImageView = {
+    lazy var iconImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.image = image?.withRenderingMode(imageRenderingMode)

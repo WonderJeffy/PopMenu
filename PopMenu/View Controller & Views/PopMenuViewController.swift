@@ -645,6 +645,9 @@ extension PopMenuViewController {
         delegate?.popMenuDidSelectItem?(self, at: index)
 
         // Should dismiss or not
+        guard action.keepSelected == false else {
+            return
+        }
         if shouldDismissOnSelection {
             dismiss(animated: true) {
                 // Selection made.
