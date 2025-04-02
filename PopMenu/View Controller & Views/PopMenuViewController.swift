@@ -438,9 +438,10 @@ extension PopMenuViewController {
     /// - Returns: The fitting width for content
     fileprivate func calculateContentWidth() -> CGFloat {
         // Calculate the widest width from action titles to determine the width
-        let contentFitWidth = actions.map( { $0.caculateWidth() }).max() {
-            return $0 < $1
-        } ?? 0
+        let contentFitWidth =
+            actions.map({ $0.caculateWidth() }).max {
+                return $0 < $1
+            } ?? 0
         return min(contentFitWidth, maxContentWidth)
     }
 
@@ -508,7 +509,6 @@ extension PopMenuViewController {
                 actionsView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
                 actionsView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
                 actionsView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-                actionsView.heightAnchor.constraint(equalToConstant: scrollView.contentSize.height),
             ])
         } else {
             // Not scrollable
@@ -517,7 +517,6 @@ extension PopMenuViewController {
                 actionsView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
                 actionsView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
                 actionsView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0),
-                actionsView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 0),
             ])
         }
     }

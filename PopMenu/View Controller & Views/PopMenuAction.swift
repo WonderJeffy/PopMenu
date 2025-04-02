@@ -137,7 +137,7 @@ public class PopMenuDefaultAction: NSObject, PopMenuAction {
     }
 
     /// Background color for highlighted state.
-    private var hilightColor: Color = .white.withAlphaComponent(0.1)
+    var hilightColor: Color = .white.withAlphaComponent(0.1)
 
     // MARK: - Subviews
 
