@@ -158,7 +158,22 @@ final public class PopMenuViewController: UIViewController {
     /// Set absolute source frame relative to screen frame.
     fileprivate func setAbsoluteSourceFrame() {
         if let sourceView = sourceViewAsUIView {
-            absoluteSourceFrame = sourceView.convert(sourceView.bounds, to: nil)
+            var frame = sourceView.convert(sourceView.bounds, to: nil)
+            let style = appearance.popMenuPresentationStyle
+            switch style.direction {
+            case .top:
+                frame = frame.offsetBy(dx: 0, dy: -frame.height)
+            case .left:
+                frame = frame.offsetBy(dx: -frame.width, dy: 0)
+            case .right:
+                frame = frame.offsetBy(dx: frame.width, dy: 0)
+            case .bottom:
+                frame = frame.offsetBy(dx: 0, dy: frame.height)
+            case .none:
+                break
+            }
+            let offset = style.offset ?? .zero
+            absoluteSourceFrame = frame.offsetBy(dx: offset.x, dy: offset.y)
         }
     }
 

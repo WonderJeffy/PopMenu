@@ -51,7 +51,7 @@ final public class PopMenuAppearance: NSObject {
     public var popMenuStatusBarStyle: UIStatusBarStyle?
     
     /// The presentation style
-    public var popMenuPresentationStyle: PopMenuPresentationStyle = .cover()
+    public var popMenuPresentationStyle: PopMenuPresentationStyle = .near(.bottom)
 
 }
 
